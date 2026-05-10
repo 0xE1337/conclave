@@ -4,7 +4,7 @@ A confidential private-credit pool for tokenized RWA, built on [Zama fhEVM](http
 
 [![Live](https://img.shields.io/badge/app-conclave--rho.vercel.app-purple)](https://conclave-rho.vercel.app)
 [![Sepolia](https://img.shields.io/badge/contracts-Sepolia-purple)](#deployments)
-[![Tests](https://img.shields.io/badge/tests-51%20passing-green)](#tests)
+[![Tests](https://img.shields.io/badge/tests-62%20passing-green)](#tests)
 [![Lint](https://img.shields.io/badge/fhevm--lint-clean-green)](#anti-pattern-audit)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 

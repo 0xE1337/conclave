@@ -116,4 +116,44 @@ describe("ListingConclave", function () {
     await expect(conclave.connect(alice).sealVote(7, enc.handles[0], enc.inputProof))
       .to.emit(conclave, "VoteSealed").withArgs(7, alice.address);
   });
+
+  it("voterCount increments correctly across mixed approve / reject votes", async function () {
+    await (await conclave.openProposal(99)).wait();
+    expect(await conclave.voterCount(99)).to.eq(0);
+
+    for (const [voter, vote] of [
+      [alice, true],
+      [bob, false],
+      [carol, true],
+    ] as const) {
+      const enc = await fhevm.createEncryptedInput(addr, voter.address)
+        .addBool(vote).encrypt();
+      await (await conclave.connect(voter).sealVote(99, enc.handles[0], enc.inputProof)).wait();
+    }
+    expect(await conclave.voterCount(99)).to.eq(3);
+  });
+
+  it("finalize emits ProposalFinalized with totalVoters and switches isFinalized", async function () {
+    await (await conclave.openProposal(50)).wait();
+    const enc = await fhevm.createEncryptedInput(addr, alice.address)
+      .addBool(true).encrypt();
+    await (await conclave.connect(alice).sealVote(50, enc.handles[0], enc.inputProof)).wait();
+
+    await network.provider.send("evm_increaseTime", [86401]);
+    await network.provider.send("evm_mine");
+
+    expect(await conclave.isFinalized(50)).to.eq(false);
+    await expect(conclave.finalize(50))
+      .to.emit(conclave, "ProposalFinalized").withArgs(50, 1);
+    expect(await conclave.isFinalized(50)).to.eq(true);
+  });
+
+  it("rejects double finalize (AlreadyFinalized)", async function () {
+    await (await conclave.openProposal(60)).wait();
+    await network.provider.send("evm_increaseTime", [86401]);
+    await network.provider.send("evm_mine");
+    await (await conclave.finalize(60)).wait();
+    await expect(conclave.finalize(60))
+      .to.be.revertedWithCustomError(conclave, "AlreadyFinalized");
+  });
 });

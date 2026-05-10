@@ -106,4 +106,24 @@ describe("BorrowerRegistry", function () {
     await (await registry.register(alice.address, enc.handles[0], enc.inputProof, enc.handles[1], enc.inputProof)).wait();
     expect(await registry.walletOf(1)).to.eq(alice.address);
   });
+
+  it("count() tracks accurately across multiple registrations", async function () {
+    expect(await registry.count()).to.eq(0n);
+    const wallets = [alice, bob];
+    for (const w of wallets) {
+      const enc = await fhevm.createEncryptedInput(addr, gov.address)
+        .add8(2).add64(500).encrypt();
+      await (await registry.register(w.address, enc.handles[0], enc.inputProof, enc.handles[1], enc.inputProof)).wait();
+    }
+    expect(await registry.count()).to.eq(2n);
+  });
+
+  it("revoke marks borrower inactive but keeps walletOf mapping intact", async function () {
+    const enc = await fhevm.createEncryptedInput(addr, gov.address)
+      .add8(2).add64(500).encrypt();
+    await (await registry.register(alice.address, enc.handles[0], enc.inputProof, enc.handles[1], enc.inputProof)).wait();
+    await (await registry.revoke(1)).wait();
+    expect(await registry.isActive(1)).to.eq(false);
+    expect(await registry.walletOf(1)).to.eq(alice.address); // wallet mapping retained
+  });
 });

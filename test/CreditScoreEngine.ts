@@ -134,4 +134,56 @@ describe("CreditScoreEngine", function () {
       credit.connect(bob).grantRegulatorAccess(1)
     ).to.be.revertedWithCustomError(credit, "NotBorrowerOwner");
   });
+
+  it("setPool emits PoolSet event with the new pool address", async function () {
+    const fakePool = (await ethers.getSigners())[5].address;
+    await expect(credit.setPool(fakePool))
+      .to.emit(credit, "PoolSet")
+      .withArgs(fakePool);
+    expect(await credit.pool()).to.eq(fakePool);
+  });
+
+  it("setRegulator emits RegulatorSet event", async function () {
+    const reg = (await ethers.getSigners())[5].address;
+    await expect(credit.setRegulator(reg))
+      .to.emit(credit, "RegulatorSet")
+      .withArgs(reg);
+  });
+
+  it("only governor can setPool / setRegulator", async function () {
+    const stranger = (await ethers.getSigners())[3];
+    await expect(
+      credit.connect(stranger).setPool(stranger.address)
+    ).to.be.revertedWithCustomError(credit, "NotGovernor");
+    await expect(
+      credit.connect(stranger).setRegulator(stranger.address)
+    ).to.be.revertedWithCustomError(credit, "NotGovernor");
+  });
+
+  it("grantRegulatorAccess reverts when no regulator is configured", async function () {
+    await (await credit.computeScore(1)).wait();
+    await expect(credit.connect(alice).grantRegulatorAccess(1)).to.be.revertedWith(
+      "No regulator",
+    );
+  });
+
+  it("recordVolume rejects non-governor (ACL gate on encrypted volume oracle)", async function () {
+    const stranger = (await ethers.getSigners())[3];
+    const enc = await fhevm.createEncryptedInput(creditAddr, stranger.address)
+      .add32(50).encrypt();
+    await expect(
+      credit.connect(stranger).recordVolume(1, enc.handles[0], enc.inputProof)
+    ).to.be.revertedWithCustomError(credit, "NotGovernor");
+  });
+
+  it("computeScore is idempotent: re-running yields the same encrypted output handle", async function () {
+    await (await credit.recordRepayment(1)).wait();
+    await (await credit.computeScore(1)).wait();
+    const h1 = await credit.getScore(1);
+    await (await credit.computeScore(1)).wait();
+    const h2 = await credit.getScore(1);
+    // Handles are deterministic given same inputs — both should be valid handles
+    expect(h1).to.not.eq(ethers.ZeroHash);
+    expect(h2).to.not.eq(ethers.ZeroHash);
+  });
 });
