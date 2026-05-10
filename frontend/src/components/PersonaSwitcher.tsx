@@ -11,14 +11,15 @@ export function PersonaSwitcher({
   onChange: (id: PersonaId) => void;
 }) {
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-pill border-2 border-border-soft bg-cream/60 p-1.5 shadow-[0_3px_0_0_var(--color-border)]">
+    <div className="inline-flex items-center gap-1 rounded-pill border-2 border-border-soft bg-cream/60 p-1.5 shadow-[0_3px_0_0_var(--color-border)] sm:gap-1.5">
       {PERSONAS.map((p) => {
         const isActive = active === p.id;
         return (
           <button
             key={p.id}
             onClick={() => onChange(p.id)}
-            className={`relative rounded-pill px-4 py-2 text-sm font-bold tracking-wide transition-all duration-[180ms] ${
+            aria-label={p.label}
+            className={`relative rounded-pill px-2.5 py-2 text-sm font-bold tracking-wide transition-all duration-[180ms] sm:px-4 ${
               isActive
                 ? "text-ink"
                 : "text-ink-soft hover:text-ink-body"
@@ -37,7 +38,7 @@ export function PersonaSwitcher({
             )}
             <span className="relative flex items-center gap-1.5">
               <span className="text-base leading-none">{p.emoji}</span>
-              <span>{p.label}</span>
+              <span className="hidden sm:inline">{p.label}</span>
             </span>
           </button>
         );

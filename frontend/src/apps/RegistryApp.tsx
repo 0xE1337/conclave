@@ -61,10 +61,10 @@ export function RegistryApp({
         />
       </div>
 
-      {/* Roster — table-style, monospace numerics */}
-      <div className="rounded-card border-2 border-border-soft bg-card overflow-hidden">
+      {/* Roster — table-style, monospace numerics. Horizontally scrolls on mobile. */}
+      <div className="rounded-card border-2 border-border-soft bg-card overflow-x-auto">
         <div
-          className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 border-b-2 border-dashed border-border-soft px-5 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink-soft"
+          className="grid min-w-[640px] grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 border-b-2 border-dashed border-border-soft px-5 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink-soft"
           style={{ fontFamily: "var(--font-mono)" }}
         >
           <span>#</span>
@@ -81,7 +81,7 @@ export function RegistryApp({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.04 * i }}
-              className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 border-b border-border-soft/60 px-5 py-3.5 last:border-b-0 hover:bg-mint-bg/30 transition-colors"
+              className="grid min-w-[640px] grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 border-b border-border-soft/60 px-5 py-3.5 last:border-b-0 hover:bg-mint-bg/30 transition-colors"
             >
               <span
                 className="font-mono tabular-nums text-sm font-bold text-ink"

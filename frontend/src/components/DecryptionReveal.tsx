@@ -21,7 +21,7 @@ export function DecryptionReveal({
 }) {
   return (
     <div className="relative">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Pane
           tone="public"
           label="Public · LP · MEV"
@@ -85,7 +85,7 @@ export function DecryptionReveal({
         />
       </div>
 
-      {/* Mint trail flowing borrower → regulator */}
+      {/* Mint trail flowing borrower → regulator (desktop horizontal, hidden on mobile stacked layout) */}
       <AnimatePresence>
         {authorized && (
           <motion.div
@@ -101,7 +101,7 @@ export function DecryptionReveal({
               times: [0, 0.4, 0.7, 1],
               ease: [0.4, 0, 0.2, 1],
             }}
-            className="pointer-events-none absolute inset-y-6 left-0 right-0 -z-0 mx-auto h-12"
+            className="pointer-events-none absolute inset-y-6 left-0 right-0 -z-0 mx-auto hidden h-12 sm:block"
           >
             <div
               className="h-full w-1/3 rounded-pill blur-[14px]"
