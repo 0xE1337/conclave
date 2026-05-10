@@ -45,45 +45,58 @@ export function TierBand({ activeIdx }: { activeIdx: number | null }) {
           );
         })}
 
-        {/* the dot that springs in */}
+        {/* the dot that springs in — WHITE core with colored ring so it
+            stays visible regardless of which stop is underneath */}
         <AnimatePresence>
           {activeIdx !== null && (
             <motion.div
               key={activeIdx}
-              initial={{ left: "-8%", opacity: 0, scale: 0.4 }}
+              initial={{ left: "-18%", opacity: 0, scale: 0.3 }}
               animate={{
                 left: `${stopPositions[activeIdx]}%`,
                 opacity: 1,
                 scale: 1,
               }}
-              exit={{ opacity: 0, scale: 0.4 }}
+              exit={{ opacity: 0, scale: 0.3 }}
               transition={{
                 type: "spring",
-                stiffness: 380,
-                damping: 16,
-                mass: 0.9,
+                stiffness: 280,
+                damping: 13,
+                mass: 1.1,
               }}
-              className="pointer-events-none absolute top-1/2 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white"
+              className="pointer-events-none absolute top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
               style={{
-                background: STOP_COLORS[activeIdx],
-                boxShadow: `0 4px 0 0 ${STOP_COLORS[activeIdx]}55, 0 0 24px ${STOP_COLORS[activeIdx]}99`,
+                border: `5px solid ${STOP_COLORS[activeIdx]}`,
+                boxShadow: `0 4px 0 0 ${STOP_COLORS[activeIdx]}88, 0 0 28px ${STOP_COLORS[activeIdx]}cc, inset 0 0 6px ${STOP_COLORS[activeIdx]}44`,
               }}
             />
           )}
         </AnimatePresence>
 
-        {/* sparkle on resolve */}
+        {/* sparkle on resolve — larger + longer hold */}
         {activeIdx !== null && (
-          <motion.span
-            key={`sparkle-${activeIdx}`}
-            initial={{ opacity: 0, y: 0, scale: 0.6 }}
-            animate={{ opacity: [0, 1, 0], y: -16, scale: [0.6, 1.1, 0.6] }}
-            transition={{ duration: 0.7, ease: [0.34, 1.56, 0.64, 1] }}
-            className="pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-base"
-            style={{ left: `${stopPositions[activeIdx]}%` }}
-          >
-            ✨
-          </motion.span>
+          <>
+            <motion.span
+              key={`sparkle-${activeIdx}`}
+              initial={{ opacity: 0, y: 0, scale: 0.4 }}
+              animate={{ opacity: [0, 1, 1, 0], y: -28, scale: [0.4, 1.5, 1.2, 0.6] }}
+              transition={{ duration: 1.1, ease: [0.34, 1.56, 0.64, 1], delay: 0.25 }}
+              className="pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-2xl drop-shadow-[0_2px_4px_rgba(255,204,0,0.5)]"
+              style={{ left: `${stopPositions[activeIdx]}%` }}
+            >
+              ✨
+            </motion.span>
+            <motion.span
+              key={`sparkle2-${activeIdx}`}
+              initial={{ opacity: 0, x: 0, y: 0, scale: 0.4 }}
+              animate={{ opacity: [0, 0.9, 0], x: -12, y: -18, scale: [0.4, 1.0, 0.5] }}
+              transition={{ duration: 0.95, ease: [0.34, 1.56, 0.64, 1], delay: 0.4 }}
+              className="pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-base"
+              style={{ left: `${stopPositions[activeIdx]}%` }}
+            >
+              ✨
+            </motion.span>
+          </>
         )}
       </div>
 

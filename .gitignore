@@ -23,3 +23,7 @@ tmp
 coverage.json
 pnpm-lock.yaml
 yarn.lock
+
+# Local demo preparation — not committed
+.demo-prep/
+.video-cue-card.md
