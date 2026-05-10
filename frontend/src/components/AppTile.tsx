@@ -34,16 +34,25 @@ interface AppTileProps {
   badge?: string;
   /** click handler */
   onClick?: () => void;
+  /** stagger index for entrance animation (0..n) */
+  index?: number;
 }
 
-export function AppTile({ icon, label, subtitle, color, badge, onClick }: AppTileProps) {
+export function AppTile({ icon, label, subtitle, color, badge, onClick, index = 0 }: AppTileProps) {
   const c = COLOR_MAP[color];
   return (
     <motion.button
       onClick={onClick}
+      initial={{ opacity: 0, y: 16, scale: 0.94 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{
+        delay: 0.06 + index * 0.08,
+        type: "spring",
+        stiffness: 280,
+        damping: 18,
+      }}
       whileHover={{ y: -4 }}
       whileTap={{ y: 2 }}
-      transition={{ type: "spring", stiffness: 400, damping: 22 }}
       className="group relative flex aspect-square w-full flex-col items-start justify-between rounded-tile p-5 text-left shadow-tile transition-shadow duration-300 hover:shadow-[0_14px_28px_-6px_rgba(107,92,67,0.28)]"
       style={{
         background: c.bg,

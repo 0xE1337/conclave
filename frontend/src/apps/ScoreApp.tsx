@@ -13,6 +13,8 @@ import {
 } from "@/lib/demo-data";
 import { type PersonaId } from "@/lib/personas";
 
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
 export function ScoreApp({
   persona,
   onBack,
@@ -24,6 +26,7 @@ export function ScoreApp({
 }) {
   const [selectedId, setSelectedId] = useState(1);
   const [tierResolved, setTierResolved] = useState<number | null>(null);
+  const [autoPlaying, setAutoPlaying] = useState(false);
 
   const b = BORROWERS.find((x) => x.id === selectedId)!;
 
@@ -34,6 +37,27 @@ export function ScoreApp({
   const resolveTier = () => {
     setTierResolved(null);
     setTimeout(() => setTierResolved(b.tierIdx), 50);
+  };
+
+  /** Cinematic auto-play: resolve tier → wait → authorize regulator → smooth-scroll */
+  const runCinematic = async () => {
+    if (autoPlaying) return;
+    setAutoPlaying(true);
+    // Reset to a borrower whose regulator hasn't been authorized yet (or pick #001 fresh)
+    setRegulatorAuthorizedFor(b.id, false);
+    setTierResolved(null);
+    await sleep(220);
+    // Step 1: Resolve tier
+    setTierResolved(b.tierIdx);
+    await sleep(1200);
+    // Step 2: Smooth-scroll to the reveal section
+    const target = document.getElementById("decryption-reveal-anchor");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+    await sleep(900);
+    // Step 3: Authorize regulator → mint trail flows
+    setRegulatorAuthorizedFor(b.id, true);
+    await sleep(1100);
+    setAutoPlaying(false);
   };
 
   return (
@@ -49,6 +73,26 @@ export function ScoreApp({
         }}
         onBack={onBack}
       />
+
+      {/* Cinematic autoplay — runs the resolve-tier + authorize-regulator
+          sequence in one click. Useful for judges who land here without
+          clicking around, and for the demo video. */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-card border-2 border-dashed border-mint/40 bg-mint-bg/30 px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <span className="text-lg leading-none">✨</span>
+          <span className="text-xs font-semibold text-ink-body">
+            Run the cinematic sequence: resolve tier → authorize regulator → watch the mint trail.
+          </span>
+        </div>
+        <button
+          onClick={runCinematic}
+          disabled={autoPlaying}
+          className="btn-pill"
+          style={{ minWidth: 140 }}
+        >
+          {autoPlaying ? "Running…" : "▶ See it run"}
+        </button>
+      </div>
 
       {/* Borrower picker */}
       <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -143,7 +187,7 @@ export function ScoreApp({
       </div>
 
       {/* Decryption reveal — the cinematic shot */}
-      <div className="card p-5">
+      <div id="decryption-reveal-anchor" className="card p-5">
         <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h3

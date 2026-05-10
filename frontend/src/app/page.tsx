@@ -222,9 +222,10 @@ function HomeView({
         </h2>
       </div>
 
-      {/* App grid 2x2 */}
+      {/* App grid 2x2 — stagger-fade entrance */}
       <div className="grid grid-cols-2 gap-4 sm:gap-5">
         <AppTile
+          index={0}
           icon="🌿"
           label="Registry"
           subtitle="BorrowerRegistry"
@@ -233,6 +234,7 @@ function HomeView({
           onClick={() => onOpenApp("registry")}
         />
         <AppTile
+          index={1}
           icon="🌱"
           label="Score"
           subtitle="CreditScoreEngine"
@@ -241,6 +243,7 @@ function HomeView({
           onClick={() => onOpenApp("score")}
         />
         <AppTile
+          index={2}
           icon="🪺"
           label="Pool"
           subtitle="PrivateCreditPool"
@@ -249,6 +252,7 @@ function HomeView({
           onClick={() => onOpenApp("pool")}
         />
         <AppTile
+          index={3}
           icon="🗳️"
           label="Conclave"
           subtitle="ListingConclave"
