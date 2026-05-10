@@ -45,6 +45,19 @@ contract BorrowerRegistry is ZamaEthereumConfig {
     modifier onlyGov() { if (msg.sender != governor) revert NotGovernor(); _; }
 
     /// @notice Register a borrower with encrypted KYC tier and accredited bond.
+    /// @param wallet      the EOA / smart-wallet to bind this borrower id to
+    /// @param encTier     externally-encrypted euint8 KYC tier
+    ///                    (1=retail, 2=accredited, 3=qualified-purchaser, 4=institutional)
+    /// @param tierProof   ZKPoK from the relayer SDK proving the encTier handle
+    ///                    is well-formed and bound to this contract + msg.sender
+    /// @param encBond     externally-encrypted euint64 compliance bond (in wei)
+    /// @param bondProof   ZKPoK for encBond
+    /// @return id         the new borrower id (1-indexed, monotonically increasing)
+    /// @dev   Both ciphertext handles get a persistent ACL grant for `address(this)`
+    ///        plus the borrower wallet. Downstream contracts compose against the
+    ///        encrypted attributes by calling `meetsKycTier` (which returns an ebool
+    ///        already granted to msg.sender) — they never need direct access to the
+    ///        raw tier/bond ciphertexts.
     function register(
         address wallet,
         externalEuint8 encTier, bytes calldata tierProof,

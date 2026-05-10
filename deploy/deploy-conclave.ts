@@ -1,5 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { writeFileSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 
 /**
  * Conclave — Confidential Private Credit Pool for Tokenized RWA
@@ -16,52 +18,88 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
  *                                     FHE.select calls actually materialize on
  *                                     real Sepolia (anti-pattern #17 fix).
  *   - (optional) credit.setRegulator(addr) for selective disclosure flow.
+ *
+ * On success, writes a deployments/<network>.json manifest containing all four
+ * addresses + the ACL bridge tx hash for downstream consumers (frontend,
+ * verification, indexers).
  */
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
-  const { deploy, execute } = hre.deployments;
+  const { deploy, execute, read } = hre.deployments;
+  const network = hre.network.name;
 
-  const registry = await deploy("BorrowerRegistry", {
-    from: deployer,
-    log: true,
-  });
-  console.log(`BorrowerRegistry:    ${registry.address}`);
+  console.log(`\n┌─ Conclave deploy → ${network} ──────────────────────────`);
+  console.log(`│  deployer: ${deployer}`);
 
-  const conclave = await deploy("ListingConclave", {
-    from: deployer,
-    log: true,
-  });
-  console.log(`ListingConclave:     ${conclave.address}`);
+  const registry = await deploy("BorrowerRegistry", { from: deployer, log: true });
+  console.log(`│  BorrowerRegistry    ${registry.address}`);
+
+  const conclave = await deploy("ListingConclave", { from: deployer, log: true });
+  console.log(`│  ListingConclave     ${conclave.address}`);
 
   const credit = await deploy("CreditScoreEngine", {
     from: deployer,
     args: [registry.address],
     log: true,
   });
-  console.log(`CreditScoreEngine:   ${credit.address}`);
+  console.log(`│  CreditScoreEngine   ${credit.address}`);
 
   const pool = await deploy("PrivateCreditPool", {
     from: deployer,
     args: [registry.address, credit.address],
     log: true,
   });
-  console.log(`PrivateCreditPool:   ${pool.address}`);
+  console.log(`│  PrivateCreditPool   ${pool.address}`);
 
-  // CRITICAL ACL bridge — without this, score handle is never granted to pool
-  // and Sepolia coprocessor silently produces undefined ciphertext on resolveCollateralPct.
-  await execute(
+  // ── CRITICAL ACL bridge ──────────────────────────────────────────────
+  // Without this, the score handle is never granted to the pool and the
+  // Sepolia coprocessor silently produces undefined ciphertext on
+  // resolveCollateralPct (anti-pattern #17 — mock vs Sepolia parity bug).
+  const setPoolTx = await execute(
     "CreditScoreEngine",
     { from: deployer, log: true },
     "setPool",
     pool.address,
   );
-  console.log(`✓ CreditScoreEngine.setPool(${pool.address}) — ACL bridge wired`);
 
-  console.log("\n=== Conclave Deployment Complete ===");
-  console.log(`  BorrowerRegistry:    ${registry.address}`);
-  console.log(`  ListingConclave:     ${conclave.address}`);
-  console.log(`  CreditScoreEngine:   ${credit.address}`);
-  console.log(`  PrivateCreditPool:   ${pool.address}`);
+  // Verify the bridge actually persisted on-chain
+  const wiredPool = await read("CreditScoreEngine", "pool");
+  if (wiredPool.toLowerCase() !== pool.address.toLowerCase()) {
+    throw new Error(
+      `ACL bridge verification FAILED: credit.pool() = ${wiredPool}, expected ${pool.address}`,
+    );
+  }
+  console.log(`│  ✓ ACL bridge: credit.setPool(${pool.address})`);
+  console.log(`│  ✓ verified on-chain: credit.pool() = ${wiredPool}`);
+
+  // ── Manifest ─────────────────────────────────────────────────────────
+  const manifest = {
+    network,
+    chainId: hre.network.config.chainId,
+    deployedAt: new Date().toISOString(),
+    deployer,
+    contracts: {
+      BorrowerRegistry: registry.address,
+      ListingConclave: conclave.address,
+      CreditScoreEngine: credit.address,
+      PrivateCreditPool: pool.address,
+    },
+    aclBridgeTx: setPoolTx.transactionHash,
+  };
+
+  const outDir = join(__dirname, "..", "deployments", network);
+  try {
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(
+      join(outDir, "Conclave.manifest.json"),
+      JSON.stringify(manifest, null, 2),
+    );
+    console.log(`│  ✓ wrote ${outDir}/Conclave.manifest.json`);
+  } catch (e) {
+    console.warn(`│  ⚠ failed to write manifest: ${(e as Error).message}`);
+  }
+
+  console.log(`└─ Conclave deploy complete\n`);
 };
 
 export default func;

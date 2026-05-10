@@ -59,8 +59,16 @@ contract ListingConclave is ZamaEthereumConfig {
     }
 
     /// @notice Cast an encrypted vote. true = approve, false = reject.
-    ///         Vote is consumed by homomorphic addition — voter cannot prove
-    ///         their vote to anyone afterwards (anti-bribery / receipt-free).
+    /// @param assetId   the proposal id to vote on (must be in `voting` window)
+    /// @param encVote   externally-encrypted ebool: true=approve, false=reject
+    /// @param proof     ZKPoK from the relayer SDK binding the vote handle to
+    ///                  this contract + msg.sender (prevents vote-handle theft)
+    /// @dev    The vote is consumed by homomorphic addition — once added into
+    ///         `approves` and `rejects` aggregates, NO ciphertext on-chain encodes
+    ///         which way *this* msg.sender voted. Even the voter cannot produce
+    ///         a proof of their own vote to a briber afterwards. This is stronger
+    ///         than commit-reveal voting (which leaks at the reveal step) and
+    ///         requires no trusted coordinator (unlike MACI's anti-collusion model).
     function sealVote(uint256 assetId, externalEbool encVote, bytes calldata proof) external {
         Proposal storage p = _proposals[assetId];
         if (p.startedAt == 0 || block.timestamp > p.deadline) revert NotActive();
