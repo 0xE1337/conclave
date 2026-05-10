@@ -1,3 +1,5 @@
+<p align="right"><strong>English</strong> · <a href="README.zh.md">简体中文</a></p>
+
 # Conclave
 
 A confidential private-credit pool for tokenized RWA, built on [Zama fhEVM](https://docs.zama.ai/protocol). Borrower KYC tier, credit score, and pool position stay encrypted on a public L1; tier-based collateral resolution runs entirely on ciphertext; underwriting decisions are sealed in homomorphic conclave.
