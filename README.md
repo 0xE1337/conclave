@@ -16,6 +16,16 @@ A confidential private-credit pool for tokenized RWA, built on [Zama fhEVM](http
   <em>Four contracts surface as four apps; the persona switcher mirrors fhEVM's <code>FHE.allow</code> ACL — the same encrypted state, viewed through different keys.</em>
 </p>
 
+## The contrast
+
+<p align="center">
+  <img src="docs/screenshots/09-public-vs-conclave.png" alt="Same borrower, same block height — public chain vs Conclave's encrypted view" width="820">
+</p>
+
+<p align="center">
+  <em>The same borrower at the same block height. Today, BlackRock's $2.75B BUIDL fund leaks every holder, balance, and flow. JPMorgan Kinexys keeps it private — but on a closed network. Conclave runs on a <strong>public L1</strong>, encrypted, with a per-borrower regulator viewing key.</em>
+</p>
+
 ## Features
 
 - **Encrypted credit score as mutable state** — `euint32 score` lives on-chain. Repayments and defaults atomically update the score in the same tx as the loan event. No off-chain issuer to re-sign credentials.

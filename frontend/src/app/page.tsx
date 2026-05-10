@@ -1,10 +1,11 @@
 "use client";
 
 import { useReducer } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { PhoneShell } from "@/components/PhoneShell";
 import { PersonaSwitcher } from "@/components/PersonaSwitcher";
 import { AppTile } from "@/components/AppTile";
+import { PublicVsConclave } from "@/components/PublicVsConclave";
 import { RegistryApp } from "@/apps/RegistryApp";
 import { ScoreApp } from "@/apps/ScoreApp";
 import { PoolApp } from "@/apps/PoolApp";
@@ -176,6 +177,19 @@ export default function Home() {
           )}
         </AnimatePresence>
       </PhoneShell>
+
+      {/* The contrast — only on home view, hide when an app is open to keep
+          the in-app experience focused. */}
+      {state.view === "home" && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="w-full flex justify-center"
+        >
+          <PublicVsConclave />
+        </motion.div>
+      )}
 
       {/* Footer */}
       <Footer />

@@ -241,6 +241,32 @@ async function main() {
     await ctxM.close();
   }
 
+  // 9. Public-vs-Conclave contrast — desktop, scrolled to the section
+  {
+    const page = await ctx.newPage();
+    await page.goto(URL, { waitUntil: "networkidle" });
+    await sleep(1000);
+    await page.evaluate(() => {
+      const h = [...document.querySelectorAll("h3")].find((x) =>
+        x.textContent.includes("The contrast"),
+      );
+      h?.scrollIntoView({ block: "start" });
+      window.scrollBy(0, -32);
+    });
+    await sleep(400);
+    await shoot(page, "09-public-vs-conclave.png");
+    await page.close();
+  }
+
+  // 10. Full home page — phone + contrast in one tall shot
+  {
+    const page = await ctx.newPage();
+    await page.goto(URL, { waitUntil: "networkidle" });
+    await sleep(1000);
+    await shootFull(page, "10-home-full.png");
+    await page.close();
+  }
+
   await ctx.close();
   await browser.close();
   console.log("\n✓ Done.");
