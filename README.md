@@ -176,16 +176,16 @@ Two layer-3 (privacy boundary) issues were found and fixed pre-tag in `PrivateCr
 ## Tests
 
 ```
-51 passing
+62 passing
 1 pending (Sepolia-only smoke)
 ```
 
 | Suite | Count |
 |---|---|
-| `BorrowerRegistry` | 8 |
-| `CreditScoreEngine` | 12 |
+| `BorrowerRegistry` | 10 |
+| `CreditScoreEngine` | 18 |
 | `PrivateCreditPool` | 19 |
-| `ListingConclave` | 10 |
+| `ListingConclave` | 13 |
 | `FHECounter` (template) | 2 |
 
 Run with `npx hardhat test`.
