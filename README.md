@@ -8,6 +8,14 @@ A confidential private-credit pool for tokenized RWA, built on [Zama fhEVM](http
 [![Lint](https://img.shields.io/badge/fhevm--lint-clean-green)](#anti-pattern-audit)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
+<p align="center">
+  <img src="docs/screenshots/01-home-borrower.png" alt="Conclave home — phone shell with 4 apps and persona switcher" width="780">
+</p>
+
+<p align="center">
+  <em>Four contracts surface as four apps; the persona switcher mirrors fhEVM's <code>FHE.allow</code> ACL — the same encrypted state, viewed through different keys.</em>
+</p>
+
 ## Features
 
 - **Encrypted credit score as mutable state** — `euint32 score` lives on-chain. Repayments and defaults atomically update the score in the same tx as the loan event. No off-chain issuer to re-sign credentials.
@@ -172,6 +180,16 @@ Two layer-3 (privacy boundary) issues were found and fixed pre-tag in `PrivateCr
 
 Run with `npx hardhat test`.
 
+## Selective Disclosure (the magnetic shot)
+
+<p align="center">
+  <img src="docs/screenshots/04-score-decryption-reveal.png" alt="Score app — TierBand resolved + 3-pane DecryptionReveal with Regulator authorized" width="780">
+</p>
+
+<p align="center">
+  <em>Cascading <code>FHE.select</code> resolves only the tier (50% Elite); the score never decrypts. <code>FHE.allow(score, regulator)</code> grants exactly one address selective decrypt access — Public still sees ciphertext, Regulator sees plaintext, Borrower retains full ownership.</em>
+</p>
+
 ## Why FHE here
 
 The project deliberately uses FHE rather than ZK selective-disclosure credentials because:
@@ -182,14 +200,18 @@ The project deliberately uses FHE rather than ZK selective-disclosure credential
 
 ## Frontend
 
-The [demo dApp](https://conclave-rho.vercel.app) is a Next.js 16 / Tailwind 4 / Turbopack app with four screens:
+The [demo dApp](https://conclave-rho.vercel.app) is a Next.js 16 / Tailwind 4 / framer-motion / Turbopack app, designed in Animal-Crossing-inspired warm pastel with the cinematic constraint *"warm in chrome, sharp in data"* — soft shapes for chrome, monospace tabular numerics for state.
 
-- **Borrowers** — institutional borrower cards with encrypted tier + score + collateral band
-- **Credit Engine** — score heatmap + the formula
-- **Credit Pool** — tier distribution + active loans
-- **Listing Conclave** — sealed proposals (encrypted vs finalized aggregates)
+Four screens, one persona-switcher row:
 
-Source: [`frontend/`](frontend/).
+| | |
+|---|---|
+| <img src="docs/screenshots/06-registry-app.png" alt="Registry roster" width="380"> | <img src="docs/screenshots/03-score-tier-resolved.png" alt="Score with tier band resolved" width="380"> |
+| <strong>Registry</strong> — institutional borrower roster with encrypted KYC tier (revealed for the persona who owns the row, sealed otherwise) | <strong>Score</strong> — encrypted credit score, formula breakdown, cascading <code>FHE.select</code> tier resolution |
+| <img src="docs/screenshots/07-pool-app.png" alt="Pool KPI + tier distribution + active loans" width="380"> | <img src="docs/screenshots/05-conclave-app.png" alt="Listing Conclave — sealed proposals" width="380"> |
+| <strong>Pool</strong> — TVL / active loans / repayments / default rate, tier-distribution bar, active-loan table | <strong>Conclave</strong> — sealed RWA listing proposals; underwriter-only voting via homomorphic tally |
+
+Source: [`frontend/`](frontend/). Hero screenshot pipeline in [`scripts/capture-screenshots.mjs`](scripts/capture-screenshots.mjs).
 
 ## Acknowledgments
 
