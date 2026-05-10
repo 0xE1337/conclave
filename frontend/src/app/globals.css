@@ -1,57 +1,267 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────
+   Conclave design tokens — warm parchment +
+   mint accent + Animal Crossing-style depth.
+   No dark mode. No cold blue. No pure black.
+────────────────────────────────────────────── */
+
 :root {
-  --bg-primary: #fafaf8;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f4f4f2;
-  --bg-muted: #eeeee9;
-  --text-primary: #18181b;
-  --text-secondary: #3f3f46;
-  --text-muted: #71717a;
-  --border: #e4e4e7;
-  --accent: #f97316;
+  /* Surfaces */
+  --color-parchment: #f8f8f0;
+  --color-parchment-warm: rgb(247, 243, 223);
+  --color-cream: #f7f3df;
+  --color-card: #fffdf3;
+
+  /* Text — warm browns only */
+  --color-ink: #794f27;
+  --color-ink-body: #725d42;
+  --color-ink-soft: #8a7b66;
+  --color-ink-muted: #9f927d;
+  --color-ink-disabled: #c4b89e;
+
+  /* Mint accent (primary) */
+  --color-mint: #19c8b9;
+  --color-mint-hover: #3dd4c6;
+  --color-mint-active: #11a89b;
+  --color-mint-bg: #e6f9f6;
+
+  /* Status */
+  --color-success: #6fba2c;
+  --color-warning: #f5c31c;
+  --color-error: #e05a5a;
+  --color-focus: #ffcc00;
+
+  /* Persona tints */
+  --color-borrower: #82d5bb;
+  --color-lp: #f7cd67;
+  --color-underwriter: #8ac68a;
+  --color-regulator: #e59266;
+
+  /* NookPhone palette */
+  --color-app-pink: #f8a6b2;
+  --color-app-lavender: #b77dee;
+  --color-app-sky: #889df0;
+  --color-app-yellow: #f7cd67;
+  --color-app-coral: #e59266;
+  --color-app-mint: #82d5bb;
+  --color-app-sage: #8ac68a;
+  --color-app-red: #fc736d;
+
+  /* Borders */
+  --color-border-soft: #e8dec7;
+  --color-border: #d4c9b4;
+  --color-border-strong: #9f927d;
+
+  /* Shadows — Nintendo button-press, NOT elevation */
+  --shadow-press: 0 5px 0 0 #bdaea0;
+  --shadow-press-hover: 0 6px 0 0 #bdaea0;
+  --shadow-press-active: 0 1px 0 0 #bdaea0;
+  --shadow-input: 0 3px 0 0 #d4c9b4;
+  --shadow-card: 0 4px 14px rgba(107, 92, 67, 0.18);
+  --shadow-card-hover: 0 8px 24px rgba(114, 93, 66, 0.22);
+  --shadow-tile: 0 6px 18px rgba(107, 92, 67, 0.18);
+
+  /* Radii */
+  --radius-pill: 50px;
+  --radius-card: 20px;
+  --radius-tile: 28px;
+  --radius-sm: 12px;
+  --radius-modal: 36px;
+
+  /* Motion */
+  --ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-springy: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-tap: 180ms;
+  --duration-panel: 280ms;
+  --duration-reveal: 480ms;
 }
 
-.dark {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #111116;
-  --bg-tertiary: #1a1a22;
-  --bg-muted: #252530;
-  --text-primary: #fafafa;
-  --text-secondary: #d4d4d8;
-  --text-muted: #71717a;
-  --border: #27272f;
-  --accent: #f97316;
-}
-
+/* Map vars → Tailwind utilities (Tailwind 4 @theme inline pattern) */
 @theme inline {
-  --color-surface-primary: var(--bg-primary);
-  --color-surface-secondary: var(--bg-secondary);
-  --color-surface-tertiary: var(--bg-tertiary);
-  --color-surface-muted: var(--bg-muted);
-  --color-content-primary: var(--text-primary);
-  --color-content-secondary: var(--text-secondary);
-  --color-content-muted: var(--text-muted);
-  --color-border: var(--border);
-  --color-accent: var(--accent);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-parchment: var(--color-parchment);
+  --color-parchment-warm: var(--color-parchment-warm);
+  --color-cream: var(--color-cream);
+  --color-card: var(--color-card);
+
+  --color-ink: var(--color-ink);
+  --color-ink-body: var(--color-ink-body);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-disabled: var(--color-ink-disabled);
+
+  --color-mint: var(--color-mint);
+  --color-mint-hover: var(--color-mint-hover);
+  --color-mint-active: var(--color-mint-active);
+  --color-mint-bg: var(--color-mint-bg);
+
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-focus: var(--color-focus);
+
+  --color-borrower: var(--color-borrower);
+  --color-lp: var(--color-lp);
+  --color-underwriter: var(--color-underwriter);
+  --color-regulator: var(--color-regulator);
+
+  --color-app-pink: var(--color-app-pink);
+  --color-app-lavender: var(--color-app-lavender);
+  --color-app-sky: var(--color-app-sky);
+  --color-app-yellow: var(--color-app-yellow);
+  --color-app-coral: var(--color-app-coral);
+  --color-app-mint: var(--color-app-mint);
+  --color-app-sage: var(--color-app-sage);
+  --color-app-red: var(--color-app-red);
+
+  --color-border-soft: var(--color-border-soft);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+
+  --radius-pill: 50px;
+  --radius-card: 20px;
+  --radius-tile: 28px;
+  --radius-modal: 36px;
+
+  --font-sans: var(--font-nunito), -apple-system, "PingFang SC", sans-serif;
+  --font-display: var(--font-display), -apple-system, system-ui, sans-serif;
+  --font-mono: var(--font-mono), "SF Mono", "Cascadia Code", Consolas, monospace;
 }
 
+/* ─────────────────────────────────────────────
+   Base layer
+────────────────────────────────────────────── */
 html, body {
-  height: 100%;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  background-color: var(--color-parchment-warm);
+  color: var(--color-ink-body);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100%;
 }
 
 * { box-sizing: border-box; }
 
-@keyframes shimmer {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+::selection {
+  background: var(--color-mint);
+  color: white;
 }
-@keyframes pulse-glow {
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* ─────────────────────────────────────────────
+   Reusable utility classes — pill button + card
+────────────────────────────────────────────── */
+
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: var(--radius-pill);
+  background: var(--color-mint);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-press);
+  transition: all var(--duration-tap) var(--ease-springy);
+  cursor: pointer;
+  border: none;
+  user-select: none;
+}
+.btn-pill:hover {
+  background: var(--color-mint-hover);
+  box-shadow: var(--shadow-press-hover);
+  transform: translateY(-1px);
+}
+.btn-pill:active {
+  background: var(--color-mint-active);
+  box-shadow: var(--shadow-press-active);
+  transform: translateY(2px);
+}
+.btn-pill:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-pill-ghost {
+  background: transparent;
+  color: var(--color-ink-body);
+  border: 2.5px solid var(--color-border);
+  box-shadow: 0 3px 0 0 var(--color-border);
+}
+.btn-pill-ghost:hover {
+  border-color: var(--color-mint);
+  color: var(--color-mint-active);
+  background: var(--color-mint-bg);
+  box-shadow: 0 4px 0 0 var(--color-border);
+}
+.btn-pill-ghost:active {
+  box-shadow: 0 1px 0 0 var(--color-border);
+}
+
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  border: 2px solid var(--color-border-soft);
+  box-shadow: var(--shadow-card);
+  transition: all var(--duration-panel) var(--ease-springy);
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* ─────────────────────────────────────────────
+   Animations
+────────────────────────────────────────────── */
+
+@keyframes float-leaf {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-3px) rotate(2deg); }
+}
+
+@keyframes shimmer-mint {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
 }
+
+@keyframes sparkle-up {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+  50% { opacity: 1; transform: translate(-50%, -8px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -16px) scale(0.6); }
+}
+
+@keyframes app-tile-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes blink-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.leaf-float { animation: float-leaf 3.5s ease-in-out infinite; }
+.shimmer-mint { animation: shimmer-mint 2.5s ease-in-out infinite; }
+
+/* Subtle paper grain on page background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(121, 79, 39, 0.04) 1px, transparent 1px);
+  background-size: 18px 18px;
+  z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
