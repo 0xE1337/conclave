@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { PERSONAS, type PersonaId } from "@/lib/personas";
+import { useT } from "@/lib/i18n";
 
 export function PersonaSwitcher({
   active,
@@ -10,15 +11,17 @@ export function PersonaSwitcher({
   active: PersonaId;
   onChange: (id: PersonaId) => void;
 }) {
+  const t = useT();
   return (
     <div className="inline-flex items-center gap-1 rounded-pill border-2 border-border-soft bg-cream/60 p-1.5 shadow-[0_3px_0_0_var(--color-border)] sm:gap-1.5">
       {PERSONAS.map((p) => {
         const isActive = active === p.id;
+        const label = t.persona[p.id].label;
         return (
           <button
             key={p.id}
             onClick={() => onChange(p.id)}
-            aria-label={p.label}
+            aria-label={label}
             className={`relative rounded-pill px-2.5 py-2 text-sm font-bold tracking-wide transition-all duration-[180ms] sm:px-4 ${
               isActive
                 ? "text-ink"
@@ -38,7 +41,7 @@ export function PersonaSwitcher({
             )}
             <span className="relative flex items-center gap-1.5">
               <span className="text-base leading-none">{p.emoji}</span>
-              <span className="hidden sm:inline">{p.label}</span>
+              <span className="hidden sm:inline">{label}</span>
             </span>
           </button>
         );

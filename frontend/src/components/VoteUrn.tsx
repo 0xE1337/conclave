@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { useT } from "@/lib/i18n";
 
 /**
  * VoteUrn — visualises a sealed-vote tally. While voting is open,
@@ -21,6 +22,7 @@ export function VoteUrn({
   rejects?: number;
   voterCount: number;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-col items-stretch gap-4">
       <AnimatePresence mode="wait">
@@ -41,10 +43,10 @@ export function VoteUrn({
                     className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-mint-active"
                     style={{ fontFamily: "var(--font-mono)" }}
                   >
-                    Sealed
+                    {t.voteUrn.sealed}
                   </span>
                   <span className="text-sm font-semibold text-ink-body">
-                    {voterCount} {voterCount === 1 ? "vote" : "votes"} cast
+                    {voterCount} {t.voteUrn.voteWord} {t.voteUrn.castSuffix}
                   </span>
                 </div>
               </div>
@@ -61,8 +63,7 @@ export function VoteUrn({
               className="mt-3 text-xs leading-relaxed text-ink-soft"
               style={{ fontFamily: "var(--font-sans)" }}
             >
-              Tally accumulates as ciphertext. Voters cannot prove how they
-              voted to a briber afterwards.
+              {t.voteUrn.tallyNote}
             </p>
           </motion.div>
         ) : (
@@ -80,26 +81,26 @@ export function VoteUrn({
                   className="text-sm font-bold uppercase tracking-[0.14em] text-success"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
-                  Tally revealed
+                  {t.voteUrn.tallyRevealed}
                 </span>
               </div>
               <span
                 className="font-mono text-[10px] uppercase tracking-wider text-ink-soft"
                 style={{ fontFamily: "var(--font-mono)" }}
               >
-                {voterCount} voters
+                {t.voteUrn.voterCount(voterCount)}
               </span>
             </div>
             <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
               <TallyBar
-                label="Approve"
+                label={t.voteUrn.approve}
                 value={approves ?? 0}
                 total={(approves ?? 0) + (rejects ?? 0)}
                 color="var(--color-success)"
               />
               <span className="text-xl text-ink-soft">·</span>
               <TallyBar
-                label="Reject"
+                label={t.voteUrn.reject}
                 value={rejects ?? 0}
                 total={(approves ?? 0) + (rejects ?? 0)}
                 color="var(--color-error)"

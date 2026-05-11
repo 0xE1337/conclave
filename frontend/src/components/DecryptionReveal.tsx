@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { useT } from "@/lib/i18n";
 
 /**
  * DecryptionReveal — three-pane "what each persona sees" view.
@@ -19,25 +20,26 @@ export function DecryptionReveal({
   value: string;
   cipher?: string;
 }) {
+  const t = useT();
   return (
     <div className="relative">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Pane
           tone="public"
-          label="Public · LP · MEV"
+          label={t.decryption.paneCipher}
           status={
             <span className="font-mono text-[10px] tracking-tight text-ink-muted">
               {cipher}
             </span>
           }
           value={
-            <span className="font-mono text-base text-ink-muted/80">🍃 sealed</span>
+            <span className="font-mono text-base text-ink-muted/80">{t.decryption.sealed}</span>
           }
         />
         <Pane
           tone="borrower"
-          label="You · Borrower"
-          status={<StatusDot color="var(--color-success)" text="full access" />}
+          label={t.decryption.paneBorrower}
+          status={<StatusDot color="var(--color-success)" text={t.decryption.fullAccess} />}
           value={
             <span
               className="font-bold tabular-nums text-2xl text-ink"
@@ -49,11 +51,11 @@ export function DecryptionReveal({
         />
         <Pane
           tone={authorized ? "regulator-on" : "regulator-off"}
-          label="Regulator"
+          label={t.decryption.paneRegulator}
           status={
             <StatusDot
               color={authorized ? "var(--color-regulator)" : "var(--color-ink-muted)"}
-              text={authorized ? "authorized" : "no access"}
+              text={authorized ? t.decryption.authorized : t.decryption.noAccess}
             />
           }
           value={

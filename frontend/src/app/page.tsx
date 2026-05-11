@@ -1,16 +1,17 @@
 "use client";
 
 import { useReducer } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { PhoneShell } from "@/components/PhoneShell";
 import { PersonaSwitcher } from "@/components/PersonaSwitcher";
 import { AppTile } from "@/components/AppTile";
 import { PublicVsConclave } from "@/components/PublicVsConclave";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { RegistryApp } from "@/apps/RegistryApp";
 import { ScoreApp } from "@/apps/ScoreApp";
 import { PoolApp } from "@/apps/PoolApp";
 import { ConclaveApp } from "@/apps/ConclaveApp";
-import { PERSONAS, personaById, type PersonaId } from "@/lib/personas";
+import { personaById, type PersonaId } from "@/lib/personas";
 import {
   BORROWERS,
   POOL_STATS,
@@ -18,6 +19,7 @@ import {
   SEPOLIA_ADDRESSES,
   ETHERSCAN_BASE,
 } from "@/lib/demo-data";
+import { useT } from "@/lib/i18n";
 
 type AppId = "registry" | "score" | "pool" | "conclave";
 type View = "home" | AppId;
@@ -39,7 +41,7 @@ function reducer(s: AppState, a: Action): AppState {
     case "navigate":
       return { ...s, view: a.view };
     case "set-persona":
-      return { ...s, view: "home", persona: a.persona };
+      return { ...s, persona: a.persona };
     case "set-regulator-auth":
       return {
         ...s,
@@ -60,16 +62,16 @@ const initial: AppState = {
 export default function Home() {
   const [state, dispatch] = useReducer(reducer, initial);
   const persona = personaById(state.persona);
-
-  // Inject regulatorAuthorized into the borrower view that ScoreApp reads
-  // (lightweight prop drilling — no need for context for a single dependency)
-  const borrowersWithAuth = BORROWERS.map((b) => ({
-    ...b,
-    regulatorAuthorized: state.regulatorAuthorized[b.id] ?? b.regulatorAuthorized,
-  }));
+  const t = useT();
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-start gap-6 px-4 py-10 sm:px-8 sm:py-14">
+      {/* Language toggle, fixed top-right so it's always reachable
+          (otherwise users would scroll up just to switch language) */}
+      <div className="fixed right-4 top-4 z-50 sm:right-6 sm:top-6">
+        <LanguageToggle />
+      </div>
+
       {/* Brand header */}
       <header className="flex flex-col items-center gap-2 text-center">
         <div className="flex items-center gap-2">
@@ -78,14 +80,14 @@ export default function Home() {
             className="text-3xl font-bold tracking-tight text-ink"
             style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}
           >
-            Conclave
+            {t.brand.title}
           </h1>
         </div>
         <p
           className="max-w-md text-sm leading-relaxed text-ink-soft"
           style={{ fontFamily: "var(--font-sans)" }}
         >
-          Confidential private credit, decided in cryptographic conclave.
+          {t.brand.tagline}
         </p>
       </header>
 
@@ -95,87 +97,52 @@ export default function Home() {
         onChange={(p) => dispatch({ type: "set-persona", persona: p })}
       />
 
-      {/* Phone */}
+      {/* Phone. `key` on the wrapping motion.div drives the mount-on-change
+          enter animation; we deliberately do NOT use AnimatePresence here —
+          its mode="wait" behaviour was buggy under React 19 + framer-motion,
+          which broke navigation. Conditional render + keyed re-mount gives us
+          a clean enter animation per view-change with zero risk. */}
       <PhoneShell persona={persona}>
-        <AnimatePresence mode="wait">
+        <motion.div
+          key={state.view}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+        >
           {state.view === "home" && (
-            <motion.div
-              key="home"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.28 }}
-            >
-              <HomeView
-                persona={persona}
-                onOpenApp={(view) => dispatch({ type: "navigate", view })}
-              />
-            </motion.div>
+            <HomeView
+              persona={persona}
+              onOpenApp={(view) => dispatch({ type: "navigate", view })}
+            />
           )}
-
           {state.view === "registry" && (
-            <motion.div
-              key="registry"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.32, ease: [0.34, 1.56, 0.64, 1] }}
-            >
-              <RegistryApp
-                persona={state.persona}
-                onBack={() => dispatch({ type: "navigate", view: "home" })}
-              />
-            </motion.div>
+            <RegistryApp
+              persona={state.persona}
+              onBack={() => dispatch({ type: "navigate", view: "home" })}
+            />
           )}
-
           {state.view === "score" && (
-            <motion.div
-              key="score"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.32, ease: [0.34, 1.56, 0.64, 1] }}
-            >
-              <ScoreAppWrapper
-                persona={state.persona}
-                authMap={state.regulatorAuthorized}
-                onBack={() => dispatch({ type: "navigate", view: "home" })}
-                onSetAuth={(id, auth) =>
-                  dispatch({ type: "set-regulator-auth", id, auth })
-                }
-              />
-            </motion.div>
+            <ScoreAppWrapper
+              persona={state.persona}
+              authMap={state.regulatorAuthorized}
+              onBack={() => dispatch({ type: "navigate", view: "home" })}
+              onSetAuth={(id, auth) =>
+                dispatch({ type: "set-regulator-auth", id, auth })
+              }
+            />
           )}
-
           {state.view === "pool" && (
-            <motion.div
-              key="pool"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.32, ease: [0.34, 1.56, 0.64, 1] }}
-            >
-              <PoolApp
-                onBack={() => dispatch({ type: "navigate", view: "home" })}
-              />
-            </motion.div>
+            <PoolApp
+              onBack={() => dispatch({ type: "navigate", view: "home" })}
+            />
           )}
-
           {state.view === "conclave" && (
-            <motion.div
-              key="conclave"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.32, ease: [0.34, 1.56, 0.64, 1] }}
-            >
-              <ConclaveApp
-                persona={state.persona}
-                onBack={() => dispatch({ type: "navigate", view: "home" })}
-              />
-            </motion.div>
+            <ConclaveApp
+              persona={state.persona}
+              onBack={() => dispatch({ type: "navigate", view: "home" })}
+            />
           )}
-        </AnimatePresence>
+        </motion.div>
       </PhoneShell>
 
       {/* The contrast — only on home view, hide when an app is open to keep
@@ -204,6 +171,10 @@ function HomeView({
   persona: ReturnType<typeof personaById>;
   onOpenApp: (view: AppId) => void;
 }) {
+  const t = useT();
+  const personaLabel = t.persona[persona.id].label;
+  const personaTagline = t.persona[persona.id].tagline;
+
   return (
     <div className="flex flex-col gap-7">
       {/* Greeting */}
@@ -212,13 +183,13 @@ function HomeView({
           className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft"
           style={{ fontFamily: "var(--font-mono)" }}
         >
-          {persona.label} · ACL view
+          {personaLabel} · {t.home.aclView}
         </span>
         <h2
           className="mt-1 text-2xl font-bold leading-tight text-ink sm:text-[28px]"
           style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}
         >
-          {persona.tagline}
+          {personaTagline}
         </h2>
       </div>
 
@@ -227,46 +198,48 @@ function HomeView({
         <AppTile
           index={0}
           icon="🌿"
-          label="Registry"
-          subtitle="BorrowerRegistry"
+          label={t.home.tiles.registry.label}
+          subtitle={t.home.tiles.registry.subtitle}
           color="mint"
-          badge={`${BORROWERS.length} institutions`}
+          badge={t.home.badge.institutions(BORROWERS.length)}
           onClick={() => onOpenApp("registry")}
         />
         <AppTile
           index={1}
           icon="🌱"
-          label="Score"
-          subtitle="CreditScoreEngine"
+          label={t.home.tiles.score.label}
+          subtitle={t.home.tiles.score.subtitle}
           color="yellow"
-          badge="atomic state"
+          badge={t.home.badge.atomicState}
           onClick={() => onOpenApp("score")}
         />
         <AppTile
           index={2}
           icon="🪺"
-          label="Pool"
-          subtitle="PrivateCreditPool"
+          label={t.home.tiles.pool.label}
+          subtitle={t.home.tiles.pool.subtitle}
           color="sky"
-          badge={`${POOL_STATS.tvlEth.toFixed(1)} ETH TVL`}
+          badge={t.home.badge.tvl(POOL_STATS.tvlEth)}
           onClick={() => onOpenApp("pool")}
         />
         <AppTile
           index={3}
           icon="🗳️"
-          label="Conclave"
-          subtitle="ListingConclave"
+          label={t.home.tiles.conclave.label}
+          subtitle={t.home.tiles.conclave.subtitle}
           color="sage"
-          badge={`${PROPOSALS.filter((p) => p.status === "voting").length} sealing`}
+          badge={t.home.badge.sealing(
+            PROPOSALS.filter((p) => p.status === "voting").length,
+          )}
           onClick={() => onOpenApp("conclave")}
         />
       </div>
 
       {/* KPI rail */}
       <div className="grid grid-cols-3 gap-2.5 rounded-card border-2 border-dashed border-border-soft bg-card/60 px-4 py-3">
-        <Mini label="51" caption="Tests" />
-        <Mini label="0" caption="Lint errors" />
-        <Mini label="4" caption="Contracts on Sepolia" />
+        <Mini label="62" caption={t.home.kpi.tests} />
+        <Mini label="0" caption={t.home.kpi.lintErrors} />
+        <Mini label="4" caption={t.home.kpi.contracts} />
       </div>
     </div>
   );
@@ -317,6 +290,7 @@ function ScoreAppWrapper({
 }
 
 function Footer() {
+  const t = useT();
   return (
     <footer className="mt-4 flex w-full max-w-[860px] flex-col items-center gap-3">
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 font-mono text-[10px] tracking-wide text-ink-muted">
@@ -343,7 +317,7 @@ function Footer() {
           GitHub
         </a>
         <span>·</span>
-        <span>fhEVM 0.11.1 · MIT</span>
+        <span>{t.footer.stack}</span>
       </div>
     </footer>
   );

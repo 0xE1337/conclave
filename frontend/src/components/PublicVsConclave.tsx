@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useT } from "@/lib/i18n";
 
 /**
  * PublicVsConclave — side-by-side contrast that lands the thesis.
@@ -10,6 +11,7 @@ import { motion } from "framer-motion";
  * private while still settling on a public L1.
  */
 export function PublicVsConclave() {
+  const t = useT();
   return (
     <section className="w-full max-w-[860px] px-1">
       <header className="mb-4 flex items-baseline justify-between gap-3">
@@ -17,13 +19,13 @@ export function PublicVsConclave() {
           className="text-lg font-bold leading-tight text-ink"
           style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.015em" }}
         >
-          The contrast
+          {t.contrast.heading}
         </h3>
         <span
           className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink-soft"
           style={{ fontFamily: "var(--font-mono)" }}
         >
-          Same borrower · same block height
+          {t.contrast.subhead}
         </span>
       </header>
 
@@ -36,16 +38,16 @@ export function PublicVsConclave() {
         className="mt-4 text-center text-xs leading-relaxed text-ink-soft sm:text-left"
         style={{ fontFamily: "var(--font-sans)" }}
       >
-        Today, BlackRock&apos;s $2.75B BUIDL fund leaks every holder, balance, and
-        flow. JPMorgan Kinexys keeps it private — but on a closed network.
-        Conclave runs on a <strong className="font-semibold text-ink-body">public L1</strong>,
-        encrypted, with a per-borrower regulator viewing key.
+        {t.contrast.bottomPre}
+        <strong className="font-semibold text-ink-body">{t.contrast.bottomStrong}</strong>
+        {t.contrast.bottomPost}
       </p>
     </section>
   );
 }
 
 function PublicPane() {
+  const t = useT();
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -58,29 +60,30 @@ function PublicPane() {
           className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft"
           style={{ fontFamily: "var(--font-mono)" }}
         >
-          🌐 Public chain · what anyone sees
+          {t.contrast.publicHeader}
         </span>
         <span className="font-mono text-[10px] text-ink-muted">etherscan.io</span>
       </header>
 
-      <Row label="address" value="0xf39Fd6e51aad…2266" mono />
-      <Row label="kyc tier" value="Qualified Purchaser" pill="warning" />
-      <Row label="credit score" value="87 / 100" highlight="warning" />
-      <Row label="balance" value="5.00 ETH" mono />
-      <Row label="active loan" value="1.00 ETH" mono highlight="warning" />
-      <Row label="repayments" value="8 ↑   defaults 0 ↓" mono />
+      <Row label={t.contrast.colAddress} value="0xf39Fd6e51aad…2266" mono />
+      <Row label={t.contrast.colKyc} value={t.contrast.valueKycPublic} pill="warning" />
+      <Row label={t.contrast.colScore} value="87 / 100" highlight="warning" />
+      <Row label={t.contrast.colBalance} value="5.00 ETH" mono />
+      <Row label={t.contrast.colLoan} value="1.00 ETH" mono highlight="warning" />
+      <Row label={t.contrast.colRepayments} value={t.contrast.valueRepaymentsPublic} mono />
 
       <div
         className="mt-1 rounded-pill bg-app-coral/15 px-3 py-1.5 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-app-coral"
         style={{ fontFamily: "var(--font-mono)", color: "#bd6941" }}
       >
-        ⚠ everything indexable, frontrunnable, scrapable
+        {t.contrast.publicWarn}
       </div>
     </motion.div>
   );
 }
 
 function ConclavePane() {
+  const t = useT();
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -98,23 +101,23 @@ function ConclavePane() {
           className="font-mono text-[10px] font-bold uppercase tracking-[0.18em]"
           style={{ fontFamily: "var(--font-mono)", color: "var(--color-mint-active)" }}
         >
-          🍃 Conclave · what the chain stores
+          {t.contrast.conclaveHeader}
         </span>
         <span className="font-mono text-[10px] text-ink-muted">fhEVM</span>
       </header>
 
-      <Row label="address" value="0xf39Fd6e51aad…2266" mono />
-      <Row label="kyc tier" value="🍃 euint8 0x4a8d…" sealed />
-      <Row label="credit score" value="🍃 euint32 0x9af2c81a3b…" sealed />
-      <Row label="balance" value="🍃 sealed in pool aggregates" sealed />
-      <Row label="active loan" value="🍃 euint64 0x21cf04e7…" sealed />
-      <Row label="repayments" value="atomic ciphertext mutation" mono />
+      <Row label={t.contrast.colAddress} value="0xf39Fd6e51aad…2266" mono />
+      <Row label={t.contrast.colKyc} value="🍃 euint8 0x4a8d…" sealed />
+      <Row label={t.contrast.colScore} value="🍃 euint32 0x9af2c81a3b…" sealed />
+      <Row label={t.contrast.colBalance} value={t.contrast.valueSealedBalance} sealed />
+      <Row label={t.contrast.colLoan} value="🍃 euint64 0x21cf04e7…" sealed />
+      <Row label={t.contrast.colRepayments} value={t.contrast.valueRepaymentsCipher} mono />
 
       <div
         className="mt-1 rounded-pill bg-mint-bg px-3 py-1.5 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-mint-active"
         style={{ fontFamily: "var(--font-mono)" }}
       >
-        ✓ public solvency proofs · regulator on opt-in only
+        {t.contrast.conclaveOk}
       </div>
     </motion.div>
   );

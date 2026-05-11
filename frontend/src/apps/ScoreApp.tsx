@@ -12,6 +12,7 @@ import {
   ETHERSCAN_BASE,
 } from "@/lib/demo-data";
 import { type PersonaId } from "@/lib/personas";
+import { useT } from "@/lib/i18n";
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -24,6 +25,7 @@ export function ScoreApp({
   onBack: () => void;
   setRegulatorAuthorizedFor: (id: number, auth: boolean) => void;
 }) {
+  const t = useT();
   const [selectedId, setSelectedId] = useState(1);
   const [tierResolved, setTierResolved] = useState<number | null>(null);
   const [autoPlaying, setAutoPlaying] = useState(false);
@@ -64,8 +66,8 @@ export function ScoreApp({
     <div>
       <AppHeader
         icon="🌱"
-        title="Credit Score Engine"
-        subtitle="Score is mutable encrypted state · atomic update on repay/default"
+        title={t.score.title}
+        subtitle={t.score.subtitle}
         accent="var(--color-app-mint)"
         contractAddress={{
           label: `${SEPOLIA_ADDRESSES.credit.slice(0, 6)}…${SEPOLIA_ADDRESSES.credit.slice(-4)}`,
@@ -81,7 +83,7 @@ export function ScoreApp({
         <div className="flex items-center gap-2.5">
           <span className="text-lg leading-none">✨</span>
           <span className="text-xs font-semibold text-ink-body">
-            Run the cinematic sequence: resolve tier → authorize regulator → watch the mint trail.
+            {t.score.cinematicNote}
           </span>
         </div>
         <button
@@ -90,7 +92,7 @@ export function ScoreApp({
           className="btn-pill"
           style={{ minWidth: 140 }}
         >
-          {autoPlaying ? "Running…" : "▶ See it run"}
+          {autoPlaying ? t.score.runningButton : t.score.runButton}
         </button>
       </div>
 
@@ -100,7 +102,7 @@ export function ScoreApp({
           className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink-soft"
           style={{ fontFamily: "var(--font-mono)" }}
         >
-          Subject:
+          {t.score.subjectPicker}
         </span>
         {BORROWERS.slice(0, 6).map((x) => (
           <button
@@ -129,7 +131,7 @@ export function ScoreApp({
               className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink-soft"
               style={{ fontFamily: "var(--font-mono)" }}
             >
-              Borrower #{String(b.id).padStart(3, "0")}
+              {t.score.borrowerNoPrefix}{String(b.id).padStart(3, "0")}
             </div>
             <div
               className="mt-0.5 text-lg font-bold text-ink"
@@ -139,7 +141,7 @@ export function ScoreApp({
             </div>
           </div>
           <CipherBlob
-            label="Credit Score"
+            label={t.score.creditScore}
             size="md"
             revealed={canReveal}
             value={String(b.score)}
@@ -149,26 +151,27 @@ export function ScoreApp({
 
         {/* Formula breakdown */}
         <div className="mt-5 grid grid-cols-4 gap-3">
-          <FormulaCell label="Repay" value={b.repayments} weight={10} accent="var(--color-app-mint)" />
-          <FormulaCell label="Default" value={b.defaults} weight={-30} accent="var(--color-app-coral)" />
-          <FormulaCell label="Collateral" value={b.collateralPosts} weight={5} accent="var(--color-app-yellow)" />
-          <FormulaCell label="Volume" value="?" weight={1} accent="var(--color-app-sky)" sealed />
+          <FormulaCell label={t.score.formulaRepay} value={b.repayments} weight={10} accent="var(--color-app-mint)" />
+          <FormulaCell label={t.score.formulaDefault} value={b.defaults} weight={-30} accent="var(--color-app-coral)" />
+          <FormulaCell label={t.score.formulaCollateral} value={b.collateralPosts} weight={5} accent="var(--color-app-yellow)" />
+          <FormulaCell label={t.score.formulaVolume} value="?" weight={1} accent="var(--color-app-sky)" sealed />
         </div>
 
         <p className="mt-4 font-mono text-[11px] leading-relaxed text-ink-soft">
-          score = w₁·repay − w₂·default + w₃·collateral + w₄·volume, all on euint32
+          {t.score.formulaNote}
         </p>
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <button onClick={resolveTier} className="btn-pill">
-            Resolve tier on ciphertext
+            {t.score.resolveTier}
           </button>
           <span
             className="text-xs text-ink-soft"
             style={{ fontFamily: "var(--font-sans)" }}
           >
-            cascading <code className="rounded bg-mint-bg/60 px-1.5 py-0.5 font-mono text-[11px]">FHE.select</code> →
-            only the band leaves the encrypted domain
+            {t.score.resolveNotePart1}
+            <code className="rounded bg-mint-bg/60 px-1.5 py-0.5 font-mono text-[11px]">{t.score.resolveNoteCode}</code>
+            {t.score.resolveNotePart2}
           </span>
         </div>
       </div>
@@ -180,7 +183,7 @@ export function ScoreApp({
             className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft"
             style={{ fontFamily: "var(--font-mono)" }}
           >
-            Collateral tier (cascading FHE.select)
+            {t.score.tierBandTitle}
           </span>
         </div>
         <TierBand activeIdx={tierResolved} />
@@ -194,11 +197,10 @@ export function ScoreApp({
               className="text-lg font-bold text-ink"
               style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.01em" }}
             >
-              Selective regulator disclosure
+              {t.score.revealTitle}
             </h3>
             <p className="text-xs text-ink-soft">
-              The borrower opts in to grant exactly one regulator address decrypt
-              access. Everyone else still sees ciphertext.
+              {t.score.revealSubtitle}
             </p>
           </div>
           <button
@@ -209,7 +211,7 @@ export function ScoreApp({
               background: b.regulatorAuthorized ? "var(--color-success)" : undefined,
             }}
           >
-            {b.regulatorAuthorized ? "✓ Regulator authorized" : "Authorize regulator →"}
+            {b.regulatorAuthorized ? t.score.authorizedButton : t.score.authButton}
           </button>
         </div>
 
@@ -223,7 +225,7 @@ export function ScoreApp({
           className="mt-4 rounded-card border border-dashed border-border-soft bg-mint-bg/25 px-4 py-2.5 font-mono text-[11px] leading-relaxed text-ink-body"
           style={{ fontFamily: "var(--font-mono)" }}
         >
-          <span className="text-ink-soft">solidity:</span>{" "}
+          <span className="text-ink-soft">{t.score.soliditySolidity}</span>{" "}
           <span className="text-mint-active">FHE.allow</span>(
           <span className="text-ink">_credits[id].score</span>,{" "}
           <span className="text-ink">regulator</span>);

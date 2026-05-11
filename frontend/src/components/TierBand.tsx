@@ -2,6 +2,9 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { TIER_BANDS } from "@/lib/demo-data";
+import { useT } from "@/lib/i18n";
+
+const TIER_KEY = ["tier1", "tier2", "tier3", "tier4"] as const;
 
 const STOP_COLORS = [
   "var(--color-app-yellow)",
@@ -20,6 +23,7 @@ const STOP_COLORS = [
  * stays as ciphertext.
  */
 export function TierBand({ activeIdx }: { activeIdx: number | null }) {
+  const t = useT();
   const stopPositions = [10, 36.67, 63.33, 90]; // % positions of dots on the track
 
   return (
@@ -123,7 +127,7 @@ export function TierBand({ activeIdx }: { activeIdx: number | null }) {
                 className="text-[10px] font-bold uppercase leading-tight tracking-[0.12em] text-ink-soft"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                {b.label.split(" — ")[1] ?? b.label}
+                {t.tierBand[TIER_KEY[i]]}
               </span>
             </div>
           );

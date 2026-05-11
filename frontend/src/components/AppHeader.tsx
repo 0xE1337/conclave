@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useT } from "@/lib/i18n";
 
 /**
  * AppHeader — slim header inside an app screen with a back arrow,
@@ -22,6 +23,7 @@ export function AppHeader({
   /** Persona-tinted accent for the icon chip background */
   accent?: string;
 }) {
+  const t = useT();
   return (
     <div className="mb-6 flex items-center gap-3">
       <motion.button
@@ -31,7 +33,7 @@ export function AppHeader({
         className="rounded-pill border-2 border-border-soft bg-card px-3.5 py-1.5 text-xs font-bold tracking-wide text-ink-body shadow-[0_3px_0_0_var(--color-border)] transition-colors hover:border-mint hover:text-mint-active"
         style={{ fontFamily: "var(--font-display)" }}
       >
-        ← Home
+        {t.app.back}
       </motion.button>
 
       <span

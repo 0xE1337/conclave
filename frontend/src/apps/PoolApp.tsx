@@ -9,10 +9,14 @@ import {
   SEPOLIA_ADDRESSES,
   ETHERSCAN_BASE,
 } from "@/lib/demo-data";
+import { useT } from "@/lib/i18n";
+
+const TIER_KEY = ["tier1", "tier2", "tier3", "tier4"] as const;
 
 export function PoolApp({ onBack }: { onBack: () => void }) {
+  const t = useT();
   const tierCounts = TIER_BANDS.map(
-    (t) => BORROWERS.filter((b) => b.tierIdx === t.idx).length
+    (band) => BORROWERS.filter((b) => b.tierIdx === band.idx).length
   );
   const totalForBars = tierCounts.reduce((a, c) => a + c, 0) || 1;
 
@@ -22,8 +26,8 @@ export function PoolApp({ onBack }: { onBack: () => void }) {
     <div>
       <AppHeader
         icon="🪺"
-        title="Private Credit Pool"
-        subtitle="LP-funded · tier-gated · score-as-state on repay/default"
+        title={t.pool.title}
+        subtitle={t.pool.subtitle}
         accent="var(--color-app-yellow)"
         contractAddress={{
           label: `${SEPOLIA_ADDRESSES.pool.slice(0, 6)}…${SEPOLIA_ADDRESSES.pool.slice(-4)}`,
@@ -34,11 +38,11 @@ export function PoolApp({ onBack }: { onBack: () => void }) {
 
       {/* KPI strip */}
       <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="TVL" value={`${POOL_STATS.tvlEth.toFixed(1)} ETH`} accent="var(--color-app-mint)" />
-        <Kpi label="Active loans" value={String(POOL_STATS.activeLoans)} accent="var(--color-app-yellow)" />
-        <Kpi label="Repayments" value={String(POOL_STATS.totalRepayments)} accent="var(--color-app-sage)" />
+        <Kpi label={t.pool.kpiTvl} value={`${POOL_STATS.tvlEth.toFixed(1)} ETH`} accent="var(--color-app-mint)" />
+        <Kpi label={t.pool.kpiActive} value={String(POOL_STATS.activeLoans)} accent="var(--color-app-yellow)" />
+        <Kpi label={t.pool.kpiRepayments} value={String(POOL_STATS.totalRepayments)} accent="var(--color-app-sage)" />
         <Kpi
-          label="Default rate"
+          label={t.pool.kpiDefault}
           value={`${(POOL_STATS.defaultRate * 100).toFixed(1)}%`}
           accent="var(--color-app-coral)"
         />
@@ -51,13 +55,13 @@ export function PoolApp({ onBack }: { onBack: () => void }) {
             className="text-base font-bold text-ink"
             style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.01em" }}
           >
-            Collateral tier distribution
+            {t.pool.tierDistribution}
           </h3>
           <span
             className="font-mono text-[10px] uppercase tracking-wider text-ink-soft"
             style={{ fontFamily: "var(--font-mono)" }}
           >
-            {BORROWERS.length} borrowers
+            {BORROWERS.length} {t.pool.borrowersSuffix}
           </span>
         </div>
         <div className="flex h-12 overflow-hidden rounded-pill border-2 border-border-soft">
@@ -91,7 +95,7 @@ export function PoolApp({ onBack }: { onBack: () => void }) {
           })}
         </div>
         <div className="mt-3 grid grid-cols-4 gap-2 text-center">
-          {TIER_BANDS.map((t, i) => {
+          {TIER_BANDS.map((band, i) => {
             const colors = [
               "var(--color-app-yellow)",
               "var(--color-app-mint)",
@@ -99,18 +103,18 @@ export function PoolApp({ onBack }: { onBack: () => void }) {
               "var(--color-app-coral)",
             ];
             return (
-              <div key={t.idx} className="flex flex-col gap-0.5">
+              <div key={band.idx} className="flex flex-col gap-0.5">
                 <span
                   className="font-mono tabular-nums text-base font-bold"
                   style={{ color: colors[i], fontFamily: "var(--font-display)" }}
                 >
-                  {t.pct}%
+                  {band.pct}%
                 </span>
                 <span
                   className="text-[10px] font-bold uppercase tracking-wider text-ink-soft"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
-                  {t.label.split(" — ")[1]}
+                  {t.tierBand[TIER_KEY[i]]}
                 </span>
               </div>
             );
@@ -124,15 +128,15 @@ export function PoolApp({ onBack }: { onBack: () => void }) {
           className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 border-b-2 border-dashed border-border-soft px-5 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink-soft"
           style={{ fontFamily: "var(--font-mono)" }}
         >
-          <span>#</span>
-          <span>Borrower</span>
-          <span className="text-right">Borrowed</span>
-          <span className="text-right">Tier</span>
-          <span className="text-right">Days</span>
+          <span>{t.pool.colNum}</span>
+          <span>{t.pool.colBorrower}</span>
+          <span className="text-right">{t.pool.colBorrowed}</span>
+          <span className="text-right">{t.pool.colTier}</span>
+          <span className="text-right">{t.pool.colDays}</span>
         </div>
         {activeLoans.length === 0 ? (
           <div className="px-5 py-8 text-center text-sm text-ink-soft">
-            No active loans · pool fully redeemed
+            {t.pool.noActiveLoans}
           </div>
         ) : (
           activeLoans.map((b) => (

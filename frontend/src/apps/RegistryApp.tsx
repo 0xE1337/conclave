@@ -5,12 +5,14 @@ import { AppHeader } from "@/components/AppHeader";
 import { CipherBlob } from "@/components/CipherBlob";
 import {
   BORROWERS,
-  KYC_TIER_LABELS,
   SEPOLIA_ADDRESSES,
   ETHERSCAN_BASE,
   type BorrowerRecord,
 } from "@/lib/demo-data";
 import { type PersonaId } from "@/lib/personas";
+import { useT } from "@/lib/i18n";
+
+const KYC_KEY = ["unknown", "retail", "accredited", "qualifiedPurchaser", "institutional"] as const;
 
 const STATUS_DOT: Record<BorrowerRecord["status"], string> = {
   active: "var(--color-success)",
@@ -25,19 +27,22 @@ export function RegistryApp({
   persona: PersonaId;
   onBack: () => void;
 }) {
+  const t = useT();
   const canDecryptKyc = (b: BorrowerRecord): boolean => {
     // Only borrower themselves sees own KYC tier; regulator only if authorized.
     if (persona === "borrower" && b.id === 1) return true; // demo: persona 'borrower' = #001
     if (persona === "regulator" && b.regulatorAuthorized) return true;
     return false;
   };
+  const statusLabel = (s: BorrowerRecord["status"]) =>
+    s === "active" ? t.registry.statusActive : s === "paused" ? t.registry.statusPaused : t.registry.statusRevoked;
 
   return (
     <div>
       <AppHeader
         icon="🌿"
-        title="Borrower Registry"
-        subtitle="Institutional KYC — encrypted by default"
+        title={t.registry.title}
+        subtitle={t.registry.subtitle}
         contractAddress={{
           label: `${SEPOLIA_ADDRESSES.registry.slice(0, 6)}…${SEPOLIA_ADDRESSES.registry.slice(-4)}`,
           href: `${ETHERSCAN_BASE}/address/${SEPOLIA_ADDRESSES.registry}`,
@@ -48,14 +53,14 @@ export function RegistryApp({
 
       {/* Stat strip */}
       <div className="mb-5 grid grid-cols-3 gap-3">
-        <Stat label="Borrowers" value={String(BORROWERS.length)} accent="var(--color-app-mint)" />
+        <Stat label={t.registry.statBorrowers} value={String(BORROWERS.length)} accent="var(--color-app-mint)" />
         <Stat
-          label="Active"
+          label={t.registry.statActive}
           value={String(BORROWERS.filter((b) => b.status === "active").length)}
           accent="var(--color-app-yellow)"
         />
         <Stat
-          label="Total bond"
+          label={t.registry.statBond}
           value={`${(BORROWERS.reduce((s, b) => s + b.accreditedBond, 0) / 1e18).toFixed(1)} ETH`}
           accent="var(--color-app-coral)"
         />
@@ -67,14 +72,15 @@ export function RegistryApp({
           className="grid min-w-[640px] grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 border-b-2 border-dashed border-border-soft px-5 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink-soft"
           style={{ fontFamily: "var(--font-mono)" }}
         >
-          <span>#</span>
-          <span>Borrower</span>
-          <span className="text-right">KYC tier</span>
-          <span className="text-right">Activity</span>
-          <span className="text-right">Status</span>
+          <span>{t.registry.colNum}</span>
+          <span>{t.registry.colBorrower}</span>
+          <span className="text-right">{t.registry.colKyc}</span>
+          <span className="text-right">{t.registry.colActivity}</span>
+          <span className="text-right">{t.registry.colStatus}</span>
         </div>
         {BORROWERS.map((b, i) => {
           const decrypted = canDecryptKyc(b);
+          const kycLabel = t.kycTier[KYC_KEY[b.kycTier] ?? "unknown"];
           return (
             <motion.div
               key={b.id}
@@ -107,7 +113,7 @@ export function RegistryApp({
                 <CipherBlob
                   size="sm"
                   revealed={decrypted}
-                  value={KYC_TIER_LABELS[b.kycTier] || "—"}
+                  value={kycLabel}
                   cipher={`euint8 0x${(b.id * 17).toString(16).padStart(4, "0")}…`}
                 />
               </div>
@@ -122,7 +128,7 @@ export function RegistryApp({
                   className="inline-block size-2 rounded-full"
                   style={{ background: STATUS_DOT[b.status] }}
                 />
-                <span className="text-ink-soft">{b.status}</span>
+                <span className="text-ink-soft">{statusLabel(b.status)}</span>
               </span>
             </motion.div>
           );
@@ -130,9 +136,11 @@ export function RegistryApp({
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-ink-soft">
-        ERC-3643-inspired hook: <code className="rounded bg-mint-bg/60 px-1.5 py-0.5 font-mono text-[11px]">meetsKycTier(id, minTier)</code>{" "}
-        returns an <code className="rounded bg-mint-bg/60 px-1.5 py-0.5 font-mono text-[11px]">ebool</code> a downstream
-        contract composes against without seeing the raw tier.
+        {t.registry.footerPart1}
+        <code className="rounded bg-mint-bg/60 px-1.5 py-0.5 font-mono text-[11px]">{t.registry.footerCode}</code>
+        {t.registry.footerPart2}
+        <code className="rounded bg-mint-bg/60 px-1.5 py-0.5 font-mono text-[11px]">{t.registry.footerEbool}</code>
+        {t.registry.footerPart3}
       </p>
     </div>
   );

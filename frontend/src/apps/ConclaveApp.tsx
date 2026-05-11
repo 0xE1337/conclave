@@ -11,6 +11,7 @@ import {
   type ListingProposal,
 } from "@/lib/demo-data";
 import { type PersonaId } from "@/lib/personas";
+import { useT } from "@/lib/i18n";
 
 export function ConclaveApp({
   persona,
@@ -19,12 +20,13 @@ export function ConclaveApp({
   persona: PersonaId;
   onBack: () => void;
 }) {
+  const t = useT();
   const [proposals, setProposals] = useState<ListingProposal[]>(INITIAL_PROPOSALS);
   const [voting, setVoting] = useState<number | null>(null);
 
   const isUnderwriter = persona === "underwriter";
 
-  const castVote = (assetId: number, approve: boolean) => {
+  const castVote = (assetId: number, _approve: boolean) => {
     setProposals((p) =>
       p.map((x) =>
         x.assetId === assetId
@@ -39,8 +41,8 @@ export function ConclaveApp({
     <div>
       <AppHeader
         icon="🗳️"
-        title="Listing Conclave"
-        subtitle="Anti-bribery encrypted underwriting · homomorphic tally"
+        title={t.conclave.title}
+        subtitle={t.conclave.subtitle}
         accent="var(--color-app-sage)"
         contractAddress={{
           label: `${SEPOLIA_ADDRESSES.conclave.slice(0, 6)}…${SEPOLIA_ADDRESSES.conclave.slice(-4)}`,
@@ -59,18 +61,17 @@ export function ConclaveApp({
                 className="text-sm font-bold text-ink"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                You are seated at the conclave
+                {t.conclave.seatedTitle}
               </div>
               <div className="text-xs text-ink-soft">
-                Cast votes on open proposals · your vote is sealed forever
+                {t.conclave.seatedSubtitle}
               </div>
             </div>
           </div>
         </div>
       ) : (
         <div className="mb-5 rounded-card border border-dashed border-border-soft bg-cream/40 px-5 py-3 text-xs text-ink-soft">
-          Switch to <strong className="font-semibold text-ink">🌳 Underwriter</strong>{" "}
-          to cast votes. Other personas can observe sealed tallies but not vote.
+          {t.conclave.observerNote}
         </div>
       )}
 
@@ -91,7 +92,7 @@ export function ConclaveApp({
                     className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink-soft"
                     style={{ fontFamily: "var(--font-mono)" }}
                   >
-                    Asset #{p.assetId}
+                    {t.conclave.assetPrefix}{p.assetId}
                   </span>
                   <ProposalStatus status={p.status} />
                 </div>
@@ -124,32 +125,32 @@ export function ConclaveApp({
                       className="btn-pill"
                       style={{ background: "var(--color-success)" }}
                     >
-                      ✓ Approve (sealed)
+                      {t.conclave.castApprove}
                     </button>
                     <button
                       onClick={() => castVote(p.assetId, false)}
                       className="btn-pill"
                       style={{ background: "var(--color-error)" }}
                     >
-                      ✗ Reject (sealed)
+                      {t.conclave.castReject}
                     </button>
                     <button
                       onClick={() => setVoting(null)}
                       className="btn-pill btn-pill-ghost"
                     >
-                      Cancel
+                      {t.conclave.cancel}
                     </button>
                   </>
                 ) : (
                   <button onClick={() => setVoting(p.assetId)} className="btn-pill">
-                    Cast my vote →
+                    {t.conclave.castVote}
                   </button>
                 )}
               </div>
             )}
             {p.status === "voting" && isUnderwriter && p.hasVoted && (
               <div className="mt-4 inline-flex items-center gap-2 rounded-pill border-2 border-mint-bg bg-mint-bg/40 px-3 py-1.5 text-xs font-bold text-mint-active">
-                ✓ Your vote is sealed
+                {t.conclave.voted}
               </div>
             )}
           </motion.div>
@@ -162,26 +163,22 @@ export function ConclaveApp({
           className="mb-1.5 text-xs font-bold uppercase tracking-[0.14em] text-mint-active"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Why this is bribery-resistant
+          {t.conclave.whyTitle}
         </h4>
         <ul className="flex flex-col gap-1 text-xs leading-relaxed text-ink-soft">
           <li>
             <code className="rounded bg-card px-1.5 py-0.5 font-mono text-[11px]">
-              sealVote(assetId, encVote, proof)
-            </code>{" "}
-            consumes the voter&apos;s randomness via homomorphic addition — voters cannot
-            prove their vote afterwards
+              {t.conclave.why1Code}
+            </code>
+            {t.conclave.why1Part2}
           </li>
           <li>
             <code className="rounded bg-card px-1.5 py-0.5 font-mono text-[11px]">
-              finalize(assetId)
-            </code>{" "}
-            reveals only aggregates · never per-voter breakdowns
+              {t.conclave.why2Code}
+            </code>
+            {t.conclave.why2Part2}
           </li>
-          <li>
-            Stronger than commit-reveal voting (which leaks at the reveal step) · no
-            trusted coordinator (unlike MACI)
-          </li>
+          <li>{t.conclave.why3}</li>
         </ul>
       </div>
     </div>
@@ -189,11 +186,12 @@ export function ConclaveApp({
 }
 
 function ProposalStatus({ status }: { status: ListingProposal["status"] }) {
+  const t = useT();
   const styles: Record<typeof status, { label: string; bg: string; color: string }> = {
-    voting:    { label: "sealing votes", bg: "var(--color-app-yellow)", color: "var(--color-ink)" },
-    finalized: { label: "finalized",     bg: "var(--color-app-sage)",   color: "white" },
-    admitted:  { label: "admitted ✓",    bg: "var(--color-success)",     color: "white" },
-    rejected:  { label: "rejected ✗",    bg: "var(--color-error)",       color: "white" },
+    voting:    { label: t.conclave.statusVoting,    bg: "var(--color-app-yellow)", color: "var(--color-ink)" },
+    finalized: { label: t.conclave.statusFinalized, bg: "var(--color-app-sage)",   color: "white" },
+    admitted:  { label: t.conclave.statusAdmitted,  bg: "var(--color-success)",    color: "white" },
+    rejected:  { label: t.conclave.statusRejected,  bg: "var(--color-error)",      color: "white" },
   };
   const s = styles[status];
   return (
