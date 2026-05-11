@@ -38,24 +38,28 @@
 
 ## 架构
 
-```
-┌──────────────────────┐
-│  BorrowerRegistry    │  加密 KYC tier + 资质保证金
-└──────────┬───────────┘
-           │
-   ┌───────┴────────────────────────┐
-   ▼                                ▼
-┌──────────────────┐    ┌────────────────────┐
-│ CreditScoreEngine│    │  ListingConclave   │
-│ 加密信用分        │    │  封闭承销投票       │
-│ ACL 桥接到 →     │    │  (同态计数)         │
-│ pool             │    └────────────────────┘
-└──────────┬───────┘
-           ▼
-┌────────────────────────┐
-│  PrivateCreditPool     │  LP 出资,分档放贷,
-│  级联 FHE.select       │  还款/违约原子更新分数
-└────────────────────────┘
+```mermaid
+graph TD
+    Reg["<b>BorrowerRegistry</b><br/>加密 KYC tier (euint8)<br/>+ 资质保证金 (euint64)"]
+    Score["<b>CreditScoreEngine</b><br/>可变加密 euint32 信用分<br/>跨合约 ACL 桥接 → pool<br/>选择性监管者披露"]
+    Pool["<b>PrivateCreditPool</b><br/>LP 出资 · 分档放贷<br/>密文上级联 FHE.select<br/>还款/违约时原子更新分数"]
+    Conclave["<b>ListingConclave</b><br/>反贿赂封印投票<br/>同态计数 · 收据无证"]
+
+    Reg -- "meetsKycTier → ebool" --> Pool
+    Reg -- "isActive 守卫" --> Score
+    Score -- "FHE.allow(score, pool)" --> Pool
+    Pool -. "recordRepayment / recordDefault" .-> Score
+    Reg -- "借款人身份验证" --> Conclave
+
+    classDef mint fill:#a3dec7,stroke:#19c8b9,stroke-width:2px,color:#3a2f1e
+    classDef yellow fill:#f7cd67,stroke:#daa90e,stroke-width:2px,color:#3a2f1e
+    classDef sky fill:#a8b5f5,stroke:#5264c7,stroke-width:2px,color:#3a2f1e
+    classDef sage fill:#a3d4a3,stroke:#5ea05e,stroke-width:2px,color:#3a2f1e
+
+    class Reg mint
+    class Score yellow
+    class Pool sky
+    class Conclave sage
 ```
 
 | 合约 | 用途 | 行数 |

@@ -38,24 +38,28 @@ A confidential private-credit pool for tokenized RWA, built on [Zama fhEVM](http
 
 ## Architecture
 
-```
-┌──────────────────────┐
-│  BorrowerRegistry    │  encrypted KYC tier + accredited bond
-└──────────┬───────────┘
-           │
-   ┌───────┴────────────────────────┐
-   ▼                                ▼
-┌──────────────────┐    ┌────────────────────┐
-│ CreditScoreEngine│    │  ListingConclave   │
-│ encrypted score, │    │  sealed underwrite │
-│ ACL-bridged to → │    │  vote (homomorphic)│
-│ pool             │    └────────────────────┘
-└──────────┬───────┘
-           ▼
-┌────────────────────────┐
-│  PrivateCreditPool     │  LP funding, tier-gated lending,
-│  cascading FHE.select  │  atomic score updates on repay/default
-└────────────────────────┘
+```mermaid
+graph TD
+    Reg["<b>BorrowerRegistry</b><br/>encrypted KYC tier (euint8)<br/>+ accredited bond (euint64)"]
+    Score["<b>CreditScoreEngine</b><br/>mutable encrypted euint32 score<br/>cross-contract ACL bridge → pool<br/>opt-in regulator disclosure"]
+    Pool["<b>PrivateCreditPool</b><br/>LP-funded · tier-gated lending<br/>cascading FHE.select on ciphertext<br/>atomic score-as-state on repay/default"]
+    Conclave["<b>ListingConclave</b><br/>anti-bribery sealed voting<br/>homomorphic tally · receipt-free"]
+
+    Reg -- "meetsKycTier → ebool" --> Pool
+    Reg -- "isActive guard" --> Score
+    Score -- "FHE.allow(score, pool)" --> Pool
+    Pool -. "recordRepayment / recordDefault" .-> Score
+    Reg -- "borrower verification" --> Conclave
+
+    classDef mint fill:#a3dec7,stroke:#19c8b9,stroke-width:2px,color:#3a2f1e
+    classDef yellow fill:#f7cd67,stroke:#daa90e,stroke-width:2px,color:#3a2f1e
+    classDef sky fill:#a8b5f5,stroke:#5264c7,stroke-width:2px,color:#3a2f1e
+    classDef sage fill:#a3d4a3,stroke:#5ea05e,stroke-width:2px,color:#3a2f1e
+
+    class Reg mint
+    class Score yellow
+    class Pool sky
+    class Conclave sage
 ```
 
 | Contract | Purpose | LOC |
