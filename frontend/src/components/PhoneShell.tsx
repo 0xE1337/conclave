@@ -41,21 +41,12 @@ export function PhoneShell({
 
 function PhoneTopBar({ persona }: { persona: Persona }) {
   const t = useT();
-  const time = "01:42";
   const personaLabel = t.persona[persona.id].label;
   return (
     <div className="flex items-center justify-between gap-4 border-b-2 border-dashed border-border-soft/60 px-6 py-3 sm:px-8">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-ink-soft">
         <span className="inline-block size-2 rounded-full bg-success animate-[blink-soft_1.6s_ease-in-out_infinite]" />
         <span>{t.phone.live}</span>
-      </div>
-
-      <div
-        className="flex items-baseline gap-1.5 font-mono tabular-nums text-ink-soft"
-        style={{ fontFamily: "var(--font-mono)" }}
-      >
-        <span className="text-[15px] font-semibold">{time}</span>
-        <span className="text-[10px] uppercase tracking-wider">{t.phone.am}</span>
       </div>
 
       <div className="flex items-center gap-2 text-xs font-semibold text-ink-soft">
