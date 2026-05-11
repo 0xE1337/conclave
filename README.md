@@ -28,6 +28,21 @@ A confidential private-credit pool for tokenized RWA, built on [Zama fhEVM](http
   <em>The same borrower at the same block height. Today, BlackRock's $2.75B BUIDL fund leaks every holder, balance, and flow. JPMorgan Kinexys keeps it private — but on a closed network. Conclave runs on a <strong>public L1</strong>, encrypted, with a per-borrower regulator viewing key.</em>
 </p>
 
+## How it works
+
+Conclave is the on-chain stack for a private credit fund — built so every position, score, and KYC tier stays encrypted on a public L1.
+
+A private credit deal has a natural life-cycle. Conclave maps each stage to one contract:
+
+| Stage | Who | Contract | What happens |
+|---|---|---|---|
+| **1. Admission** | Underwriting committee | [`ListingConclave`](contracts/ListingConclave.sol) | Members cast sealed votes on whether an asset can be listed. Tally is homomorphic — voters cannot prove their vote to a briber afterwards. |
+| **2. Onboarding** | Governor | [`BorrowerRegistry`](contracts/BorrowerRegistry.sol) | Approved borrowers are registered with encrypted KYC tier (`euint8`) and accredited bond (`euint64`). Downstream contracts gate on `meetsKycTier → ebool` without ever seeing the raw tier. |
+| **3. Credit history** | Pool (atomic) | [`CreditScoreEngine`](contracts/CreditScoreEngine.sol) | Score lives as mutable `euint32` state. Every repayment and default updates the score in the same transaction as the loan event. No off-chain issuer needed. |
+| **4. Lending** | LPs + borrowers | [`PrivateCreditPool`](contracts/PrivateCreditPool.sol) | LPs deposit. Borrowers draw with their collateral ratio decided by cascading `FHE.select` directly on the encrypted score — only the tier band (50 / 75 / 100 / 150%) ever leaves the ciphertext domain. |
+
+**The killer feature** — `grantRegulatorAccess(id)`: a borrower opts in to give exactly **one** regulator address a viewing key over their score. That regulator can now decrypt; everyone else — LPs, MEV bots, other regulators — still sees ciphertext. **Compliance without surveillance.** This is the FHE differentiator versus ZK credentials, which would require off-chain re-issuance for each disclosure event.
+
 ## Features
 
 - **Encrypted credit score as mutable state** — `euint32 score` lives on-chain. Repayments and defaults atomically update the score in the same tx as the loan event. No off-chain issuer to re-sign credentials.

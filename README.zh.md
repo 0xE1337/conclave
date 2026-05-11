@@ -28,6 +28,21 @@
   <em>同一个借款人，同一个区块高度。BlackRock 的 27.5 亿美元 BUIDL 基金把每个持有人、余额、资金流全部暴露给竞争对手；JPMorgan Kinexys 私有 —— 但运行在封闭网络上。Conclave 跑在<strong>公链 L1</strong>，全程加密，给监管者一个 per-borrower 解密 key。</em>
 </p>
 
+## 怎么运转
+
+Conclave 是私募信贷基金的链上协议栈 —— 让每一笔头寸、信用分、KYC 等级都以密文形式存在公开 L1 上。
+
+一笔私募信贷的完整生命周期，对应 4 个合约：
+
+| 阶段 | 谁 | 合约 | 在做什么 |
+|---|---|---|---|
+| **1. 准入** | 承销委员会 | [`ListingConclave`](contracts/ListingConclave.sol) | 成员对资产是否能上池子做封印投票。同态计数 —— 投票者事后无法向贿赂者证明自己怎么投的。 |
+| **2. 入册** | Governor | [`BorrowerRegistry`](contracts/BorrowerRegistry.sol) | 通过审核的借款人登记加密 KYC 等级（`euint8`）+ 资质保证金（`euint64`）。下游合约通过 `meetsKycTier → ebool` 做准入判断，**永远看不到原始 tier**。 |
+| **3. 信用记账** | Pool（原子调用） | [`CreditScoreEngine`](contracts/CreditScoreEngine.sol) | 信用分以可变 `euint32` 形式存在。每次还款 / 违约都在同一笔 tx 里更新分数。**无需链下重新签发凭证**。 |
+| **4. 借贷** | LP + 借款人 | [`PrivateCreditPool`](contracts/PrivateCreditPool.sol) | LP 注资。借款人提款，抵押率通过对加密信用分的级联 `FHE.select` 算出 —— **只有最终的 tier 档位**（50 / 75 / 100 / 150%）会离开密文域。 |
+
+**杀手锏功能** —— `grantRegulatorAccess(id)`：借款人主动给**恰好一个**监管者地址解密权限。这个监管者拿到 `FHE.allow` 之后能解密；其他人（LP、MEV 机器人、其他监管者）都还看到密文。**合规但不监控**。这是 FHE 相对 ZK 凭证的核心差异 —— ZK 每次披露都得线下重新签发，FHE 一笔 tx 搞定，针对同一份活的链上状态。
+
 ## 核心特性
 
 - **信用分作为可变密文状态** —— `euint32 score` 存在链上。还款 / 违约事件**原子地**在同一笔交易里更新分数，不需要 off-chain issuer 重新签发凭证。
