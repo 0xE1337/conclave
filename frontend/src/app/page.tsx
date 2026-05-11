@@ -7,6 +7,9 @@ import { PersonaSwitcher } from "@/components/PersonaSwitcher";
 import { AppTile } from "@/components/AppTile";
 import { PublicVsConclave } from "@/components/PublicVsConclave";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ModeToggle } from "@/components/ModeToggle";
+import { WalletPill } from "@/components/WalletPill";
+import { LiveSnapshot } from "@/components/LiveSnapshot";
 import { RegistryApp } from "@/apps/RegistryApp";
 import { ScoreApp } from "@/apps/ScoreApp";
 import { PoolApp } from "@/apps/PoolApp";
@@ -20,6 +23,7 @@ import {
   ETHERSCAN_BASE,
 } from "@/lib/demo-data";
 import { useT } from "@/lib/i18n";
+import { useMode } from "@/lib/mode";
 
 type AppId = "registry" | "score" | "pool" | "conclave";
 type View = "home" | AppId;
@@ -63,12 +67,15 @@ export default function Home() {
   const [state, dispatch] = useReducer(reducer, initial);
   const persona = personaById(state.persona);
   const t = useT();
+  const { mode } = useMode();
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-start gap-6 px-4 py-10 sm:px-8 sm:py-14">
-      {/* Language toggle, fixed top-right so it's always reachable
-          (otherwise users would scroll up just to switch language) */}
-      <div className="fixed right-4 top-4 z-50 sm:right-6 sm:top-6">
+      {/* Top chrome — Mode + Wallet + Language, all fixed so they're always
+          reachable regardless of scroll position. Grouped right-aligned. */}
+      <div className="fixed right-4 top-4 z-50 flex flex-wrap items-center justify-end gap-2 sm:right-6 sm:top-6">
+        {mode === "live" && <WalletPill />}
+        <ModeToggle />
         <LanguageToggle />
       </div>
 
@@ -147,7 +154,7 @@ export default function Home() {
 
       {/* The contrast — only on home view, hide when an app is open to keep
           the in-app experience focused. */}
-      {state.view === "home" && (
+      {state.view === "home" && mode === "demo" && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -155,6 +162,18 @@ export default function Home() {
           className="w-full flex justify-center"
         >
           <PublicVsConclave />
+        </motion.div>
+      )}
+
+      {/* Live mode snapshot — same slot as contrast, mutually exclusive */}
+      {state.view === "home" && mode === "live" && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="w-full flex justify-center"
+        >
+          <LiveSnapshot />
         </motion.div>
       )}
 

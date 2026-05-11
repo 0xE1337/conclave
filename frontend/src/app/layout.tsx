@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Nunito, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n";
+import { ModeProvider } from "@/lib/mode";
+import { WalletProvider } from "@/lib/wallet";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -70,7 +72,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${nunito.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
     >
       <body>
-        <I18nProvider>{children}</I18nProvider>
+        <I18nProvider>
+          <ModeProvider>
+            <WalletProvider>{children}</WalletProvider>
+          </ModeProvider>
+        </I18nProvider>
       </body>
     </html>
   );
